@@ -4,8 +4,6 @@ import {
   FETCH_REVIEWS_FAILED,
   FETCH_LESSON_HISTORY_SUCCESS,
   FETCH_LESSON_HISTORY_FAILURE,
-  PAYOUT_SUCCESS,
-  PAYOUT_FAILURE,
   FETCH_DOC,
   FETCH_DOC_FAILED,
   CHANGE_METHOD_FAILED,
@@ -32,7 +30,6 @@ import {
   STRIPE_SECRET,
 }  from '../config'
 var _ = require('lodash')
-
  
 //used in coachProfile -> componentDidMount
 export const fetchReviews = (coachId) => {
@@ -195,36 +192,6 @@ export const fetchLessonHistory = () => {
       dispatch({ type: FETCH_LESSON_HISTORY_FAILURE, payload: err })
     })
   }
-}
-
-//Payout (Stripe)
-export const payout = (amount, docIds) => {
-  const user = firebase.auth().currentUser
-
-  return (dispatch) => {
-    firebase.firestore().collection('coaches')
-    .doc(user.uid).collection('payouts').add({
-      amount,
-      docIds,
-      currency: "usd",
-    }).catch((err) => console.log('PAYOUT_FAILURE', err))
-  }
-}
-
-const markPaidLessons = (user, docIds, dispatch) => {
-  _.forEach(docIds, (docId) => {
-    try {
-      firebase.firestore().collection('coaches').doc(user.uid)
-        .collection('practices').doc(docId)
-          .update({
-            paid: true,
-          }).then(() => {
-            dispatch({ type: PAYOUT_SUCCESS })
-          }).catch((err) => dispatch({ type: PAYOUT_FAILURE }))
-    } catch(err) {
-      dispatch({ type: PAYOUT_FAILURE })
-    }
-  })
 }
 
 const encoder = (info) => {
@@ -399,7 +366,6 @@ export const fetchThreads = () => {
         })
       })
     } catch(err) {
-      console.log(err)
       dispatch({ type: FETCH_THREADS_FAILED })
     }
   }

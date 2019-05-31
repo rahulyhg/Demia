@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   ScrollView,
   LayoutAnimation,
-  AsyncStorage,
 } from 'react-native';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -34,6 +33,7 @@ import {
 import { ScaledSheet, moderateScale, scale } from 'react-native-size-matters';
 import firebase from 'react-native-firebase';
 var _ = require('lodash')
+import AsyncStorage from '@react-native-community/async-storage';
 
 class CreateLesson extends Component {
   constructor(props) {

@@ -108,7 +108,10 @@ export const queryMentors = (query, filter, numericFilter, geo) => {
 
 export const fetchSearchTerms = (query) => {
   return (dispatch) => {
-    query.onSnapshot((querySnap) => {
+    query.onSnapshot((querySnap, err) => {
+      if (err) {
+        dispatch({ type: FETCH_SEARCH_TERMS_FAILURE })
+      }
       if (querySnap.empty) {
         const termInfo = {
           empty: true,
@@ -144,8 +147,6 @@ export const fetchSearchTerms = (query) => {
         }
       })
       dispatch({ type: FETCH_SEARCH_TERMS_SUCCESS, payload: termsInfo })
-    }).catch((err) => {
-      dispatch({ type: FETCH_SEARCH_TERMS_FAILURE })
     })
   }
 }

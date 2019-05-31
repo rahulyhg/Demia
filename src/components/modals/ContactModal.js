@@ -16,7 +16,7 @@ import { TimeSlotCard } from '../containers';
 import Communications from 'react-native-communications';
 import { formatPhoneNumber } from '../../util/phone';
 var _ = require('lodash');
-import { CachedImage } from 'react-native-cached-image';
+import FastImage from 'react-native-fast-image';
 import firebase from 'react-native-firebase';
 import VPStatusBar from './VPStatusBar';
 
@@ -38,17 +38,17 @@ class ContactModal extends Component {
     this.fetchCoach(uid)
   }
 
-  fetchCoach(uid) {
+  fetchCoach(uid) { // (change: move to actions)
     firebase.firestore().collection('coaches').doc(uid)
-      .get().then((doc) => {
-        console.log(doc.data())
-        const availability = doc.data().availibility? doc.data().availibility : [];
-        this.setState({ coach: doc.data() })
-        this.sortAvail(availability);
-      }).catch((err) => {
-        console.log(err)
-        this.setState({ coach: false });
-      })
+    .get().then((doc) => {
+      console.log(doc.data())
+      const availability = doc.data().availibility? doc.data().availibility : [];
+      this.setState({ coach: doc.data() })
+      this.sortAvail(availability);
+    }).catch((err) => {
+      console.log(err)
+      this.setState({ coach: false });
+    })
   }
 
   sortAvail(availability) {
@@ -131,7 +131,7 @@ class ContactModal extends Component {
     this.setState({ visible: false})
   }
 
-  render() {
+  render() { //(change: we could def dry this up)
     const { coach } = this.props;
     var phone = formatPhoneNumber(coach.coachPhone)
     var guardianPhone = coach.mentor.guardianPhone? coach.mentor.guardianPhone.replace(/\D/g,''): 'not listed'
@@ -148,14 +148,14 @@ class ContactModal extends Component {
         <View style={styles.containerStore}>
           <ScrollView style={styles.container}>
             <TouchableOpacity style={styles.xContainer} onPress={() => this.closeModal()}>
-              <CachedImage
+              <FastImage
                 source={require('../../../assets/icons/x.png')}
                 style={styles.xImg}
               />
             </TouchableOpacity>
             <TouchableWithoutFeedback onPress={() => this.toProfile()}>
               <View>
-                <CachedImage
+                <FastImage
                   style={styles.image}
                   source={{ uri: coach.mentor.picture }}
                 />

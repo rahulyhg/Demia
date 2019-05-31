@@ -1,32 +1,23 @@
 import React, { Component } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
   FlatList,
 } from 'react-native';
-import firebase from 'react-native-firebase';
 import { connect } from 'react-redux'
 import {
   Block,
   NavBar,
-  SignupSection,
 } from '../common';
 import {
   ParentCard,
-  EmptyCard,
 } from '../containers';
 import {
   ParentModal,
 } from '../modals';
 import {
   scale,
-  moderateScale,
   verticalScale,
   ScaledSheet,
 } from 'react-native-size-matters';
-import { CachedImage } from 'react-native-cached-image';
 import {
   fetchUserThreads,
 } from '../../actions';

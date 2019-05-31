@@ -4,14 +4,12 @@ import { Actions } from 'react-native-router-flux';
 import {
   View,
   Text,
-  Image,
   KeyboardAvoidingView,
   LayoutAnimation,
   TouchableOpacity,
   ScrollView,
   Linking,
   Alert,
-  AsyncStorage,
 } from 'react-native';
 import {
   signupUser,
@@ -19,12 +17,8 @@ import {
   saveApnToken,
 } from '../../actions';
 import {
-  Card,
   Block,
-  Section,
   BackNavBar,
-  Input,
-  Button,
   Spinner,
   SignupSection,
   FooterBtn,
@@ -33,16 +27,12 @@ import {
 } from '../common';
 import {
   scale,
-  verticalScale,
-  moderateScale,
   ScaledSheet,
 } from 'react-native-size-matters';
 var t = require('tcomb-form-native');
 var Form = t.form.Form;
 import firebase from 'react-native-firebase'
-const _ = require('lodash');
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { CachedImage } from 'react-native-cached-image';
 import {formStyle} from '../../stylesheet';
 
 var Request = t.struct({

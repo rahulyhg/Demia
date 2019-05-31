@@ -7,8 +7,7 @@ import {
 import {
  ScaledSheet,
 } from 'react-native-size-matters';
-import { FastImage } from 'react-native-cached-image';
-var _ = require('lodash')
+import FastImage from 'react-native-fast-image';
 
 class ChatInput extends Component {
 

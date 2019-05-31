@@ -10,7 +10,7 @@ import {
   ScaledSheet,
 } from 'react-native-size-matters';
 import StarRating from 'react-native-star-rating';
-import { CachedImage } from 'react-native-cached-image';
+import FastImage from 'react-native-fast-image';
 
 
 class CoachCard extends Component {
@@ -50,7 +50,7 @@ class CoachCard extends Component {
 
           <View style={imageViewStyle}>
             <View style={styles.imgContainer}>
-              <CachedImage
+              <FastImage
                 source={{uri: imgURL}}
                 style={imageStyle}
               />
@@ -61,7 +61,7 @@ class CoachCard extends Component {
           <View style={infoViewStyle}>
             <View style={nameDocContainer}>
             <Text style={nameStyle}>{name}</Text>
-            <CachedImage source={docStatus} style={docImgStyle}/>
+            <FastImage source={docStatus} style={docImgStyle}/>
             </View>
             <Text numberOfLines={1} style={sportStyle}>{subject? subjects: ''}</Text>
             <Text numberOfLines={3} style={bioStyle}>{bio}</Text>

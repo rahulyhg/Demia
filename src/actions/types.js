@@ -292,3 +292,5 @@ export const LOAD_MENTORS = 'loading_mentors'
 export const TOKEN_SENT = 'token_sent'
 
 export const CHARGE_FAILED = 'charge_failed'
+
+export const THREAD_CREATION_FAILED = 'thread_creation_failed'

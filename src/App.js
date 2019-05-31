@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, AsyncStorage, Alert, } from 'react-native';
+import { View, Alert, } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import reducers from './reducers';
@@ -8,6 +8,7 @@ import Router from './Router';
 import VPStatusBar from './VPStatusBar';
 import firebase from 'react-native-firebase'
 import logger from 'redux-logger'
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 export default class App extends Component {

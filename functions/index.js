@@ -645,3 +645,19 @@ const stripeCustomerCreated = (body, request, response) => {
   const customerCharged = (body, request, response) => {
   
   }
+
+  const markPaidLessons = (user, docIds, dispatch) => {
+    _.forEach(docIds, (docId) => {
+      try {
+        firebase.firestore().collection('coaches').doc(user.uid)
+          .collection('practices').doc(docId)
+            .update({
+              paid: true,
+            }).then(() => {
+              dispatch({ type: PAYOUT_SUCCESS })
+            }).catch((err) => dispatch({ type: PAYOUT_FAILURE }))
+      } catch(err) {
+        dispatch({ type: PAYOUT_FAILURE })
+      }
+    })
+  }

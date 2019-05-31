@@ -1,15 +1,11 @@
 import React, { Component } from 'react';
 import {
-  NativeModules,
   StatusBar,
   Platform,
   View,
   Dimensions,
 } from 'react-native';
 import {
-  scale,
-  verticalScale,
-  moderateScale,
   ScaledSheet,
 } from 'react-native-size-matters';
 

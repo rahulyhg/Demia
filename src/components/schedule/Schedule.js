@@ -1,24 +1,20 @@
 import React, { Component } from 'react';
 import {
   View,
-  Text,
-  TouchableOpacity,
   FlatList,
-  Image,
   ScrollView,
   Alert,
-  AsyncStorage
 } from 'react-native';
 import { connect } from 'react-redux';
 import { schedulePractice, reschedule, fetchSchedule, fetchLessonsToRate } from '../../actions';
 import { Actions } from 'react-native-router-flux';
-import { Block, NavBar, SignupSection, Spinner } from '../common';
+import { Block, NavBar, Spinner } from '../common';
 import { PracticeCard, EmptyCard } from '../containers';
 import { PracticeModal, EditModal } from '../modals';
-import { scale, verticalScale, moderateScale, ScaledSheet } from 'react-native-size-matters';
+import { verticalScale, ScaledSheet } from 'react-native-size-matters';
 import firebase from 'react-native-firebase';
 import RNCalendarEvents from 'react-native-calendar-events';
-import moment from 'moment'
+import AsyncStorage from '@react-native-community/async-storage';
 
 class Schedule extends Component {
   constructor(props) {

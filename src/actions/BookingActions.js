@@ -14,7 +14,7 @@ var _ = require('lodash')
 import firebase from 'react-native-firebase';
 import moment from 'moment'
 import { makeCharge, transferFundsToCoach } from './PaymentActions'
- 
+const uuidv1 = require('uuid/v1')
 
 export const purchaseSession = (lessonInfo) => {
  return (dispatch) => {
@@ -46,13 +46,13 @@ export const purchaseSession = (lessonInfo) => {
 const bookLesson = (lessonInfo, dispatch) => {
   const { prep, price, user, coach, coachId, lesson } = lessonInfo
   if (coach && coachId) {
-    let threadId = _.random(1000000, 99999999)
+    let threadId = uuidv1()
     addMentor(coach, coachId, user, threadId, dispatch)
   }
 
   let _date = new Date()
   const _user = firebase.auth().currentUser
-  var id = _.random(10000000000, 999999999999)
+  var id = uuidv1()
 
   firebase.firestore().collection('users').doc(_user.uid)
   .collection('lessons').add({

@@ -2,16 +2,11 @@ import React, { Component } from 'react'
 import {
   Text,
   View,
-  StyleSheet,
   TouchableOpacity,
-  Dimensions,
-  Platform,
 } from 'react-native'
 import {
   ScaledSheet,
   moderateScale,
-  scale,
-  verticalScale,
 } from 'react-native-size-matters';
 import { Actions } from 'react-native-router-flux';
 import { CachedImage } from 'react-native-cached-image';

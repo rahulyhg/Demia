@@ -6,6 +6,7 @@ import {
   FETCH_PAYMENT_H_SUCCESS,
   TOKEN_SENT,
   CHARGE_FAILED,
+  PAYOUT_SUCCESS,
   PAYOUT_FAILURE,
 } from './types';
 import firebase from 'react-native-firebase';
@@ -149,4 +150,18 @@ export const transferFundsToCoach = (coachUid, price, dispatch) => {
     return firebase.firestore().collection('coaches')
     .doc(coachUid).collection('transfers').add(info)
   }).catch((err) => dispatch({ type: PAYOUT_FAILURE, payload: err }))
+}
+
+//Payout (Stripe)
+export const payout = (amount, docIds) => {
+  const user = firebase.auth().currentUser
+
+  return (dispatch) => {
+    firebase.firestore().collection('coaches')
+    .doc(user.uid).collection('payouts').add({
+      amount,
+      docIds,
+      currency: "usd",
+    }).catch((err) => dispatch({ type: PAYOUT_FAILURE, payload: err}))
+  }
 }

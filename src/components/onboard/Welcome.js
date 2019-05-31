@@ -49,7 +49,7 @@ class Welcome extends Component {
             Actions.locker({ profile: user,  role: 'coach'})
           }
         }).catch((err) => {
-          console.log('caught')
+          console.log('caught', err)
         })
       } else {
         // console.log('no user')

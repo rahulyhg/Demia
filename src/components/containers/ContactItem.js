@@ -7,33 +7,29 @@ import {
 import {
   ScaledSheet,
 } from 'react-native-size-matters';
-import { CachedImage } from 'react-native-cached-image';
+import FastImage from 'react-native-fast-image';
 
-const minDate = () => {
-  var today = new Date();
-  var dayAfterNext = today.add(2).day();
-}
 
 class ContactItem extends Component{
   render() {
-    const { picture, sport, name } = this.props.mentor
+    const { picture, subject, name } = this.props.mentor
     const { img, coachName, contentContainer, container, arrow, info, schedule } = styles;
 
     return (
       <TouchableOpacity style={container} onPress={this.props.pressed}>
         <View style={contentContainer}>
           <View style={styles.imgContainer}>
-            <CachedImage
+            <FastImage
               style={img}
               source={{ uri: picture }}
             />
           </View>
           <View style={info}>
             <Text style={coachName}> {name} </Text>
-            <Text style={schedule}>  {sport} </Text>
+            <Text style={schedule}> {subject[0]} </Text>
           </View>
         </View>
-        <CachedImage
+        <FastImage
           style={arrow}
           source={require('../../../assets/icons/greyContact.png')}
         />
@@ -68,7 +64,7 @@ const styles = ScaledSheet.create({
     color: 'dimgrey',
   },
   info: {
-    flex: 2,
+    flex: 1,
   },
   schedule: {
     marginLeft: '10@s',

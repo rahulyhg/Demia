@@ -5,7 +5,6 @@ import {
 import {
   fetchUserMessages,
   sendMessageToUser,
-  fetchProfile,
   unsubscribeUserMessages,
 } from '../../actions'
 import {
@@ -18,7 +17,6 @@ import {
 import {
   scale,
 } from 'react-native-size-matters';
-var _ = require('lodash')
 
 class MessageThread extends Component {
   constructor(props) {
@@ -47,14 +45,12 @@ class MessageThread extends Component {
   }
 
   onNewMessage = () => {
-    var isNew = false
-
     let message = this.state.message
-    let user = this.props.user
+    let mentee = this.props.user
     let mentor = this.props.mentor
-    let thread = mentor.id
+    
 
-    this.props.sendMessageToUser(thread, message, user, mentor)
+    this.props.sendMessageToUser(message, mentee, mentor)
     this.setState({ message: '' })
   }
 

@@ -28,7 +28,6 @@ import {
   REPORT_USER_SUCCESS,
 } from './types';
 import firebase from 'react-native-firebase';
-
 import {
   GOOGLE_PLACES_API_KEY
 } from '../config'
@@ -398,7 +397,10 @@ export const fetchPreps = () => {
   return (dispatch) => {
     const user = firebase.auth().currentUser;
     firebase.firestore().collection('users').doc(user.uid)
-    .collection('preps').onSnapshot((querySnap) => {
+    .collection('preps').onSnapshot((querySnap, err) => {
+      if (err) {
+        return dispatch({ type: FETCH_ACTIVE_PREPS_FAILED })
+      }
       if (querySnap.empty) {
         const prepsInfo = { empty: true, preps: [] }
         return dispatch({ type: FETCH_ACTIVE_PREPS, payload: prepsInfo })
@@ -413,7 +415,7 @@ export const fetchPreps = () => {
         const prepInfo = { empty: false, preps: preps }
         dispatch({ type: FETCH_ACTIVE_PREPS, payload: prepInfo })
       })
-    }, () => dispatch({ type: FETCH_ACTIVE_PREPS_FAILED }))
+    })
   }
 }
 

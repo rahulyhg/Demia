@@ -8,9 +8,6 @@ import {
 } from 'react-native';
 import { TextLine } from '../containers';
 import {
-  scale,
-  moderateScale,
-  verticalScale,
   ScaledSheet,
 } from 'react-native-size-matters';
 import StarRating from 'react-native-star-rating';

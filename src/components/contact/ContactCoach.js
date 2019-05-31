@@ -47,7 +47,6 @@ class ContactCoach extends Component {
   };
 
   componentDidMount() {
-    this.queryMentors()
     this.props.fetchProfile()
     this.props.fetchThreads()
   }

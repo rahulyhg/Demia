@@ -8,177 +8,173 @@ import {
   FETCH_USER_THREADS,
   FETCH_USER_THREADS_SUCCESS,
   FETCH_USER_THREADS_FAIL,
+  THREAD_CREATION_FAILED,
 } from './types'
 import firebase from 'react-native-firebase'
 import moment from 'moment'
 var _ = require('lodash')
+const uuidv1 = require('uuid/v1');
+
 
 export const fetchMessageThreads = (role, thread) => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth().currentUser
-      firebase.firestore().collection(role).doc(user.uid)
-      .collection('message_threads').get().then((querySnap) => {
-        if (querySnap.empty) {
-          const msgInfo = { empty: true, threads: [] }
-          return dispatch({ type: FETCH_MSG_THREADS, payload: msgInfo })
-        }
+    const user = firebase.auth().currentUser
+    firebase.firestore().collection(role).doc(user.uid)
+    .collection('message_threads').get().then((querySnap) => {
+      if (querySnap.empty) {
+        const msgInfo = { empty: true, threads: [] }
+        return dispatch({ type: FETCH_MSG_THREADS, payload: msgInfo })
+      }
 
-        let msgs = []
-        querySnap.forEach(doc => {
-          msgs.push(doc.data())
-          const msgInfo = { empty: false, threads: msgs }
-          dispatch({ type: FETCH_MSG_THREADS, payload: msgInfo })
-        })
+      let msgs = []
+      querySnap.forEach(doc => {
+        msgs.push(doc.data())
+        const msgInfo = { empty: false, threads: msgs }
+        dispatch({ type: FETCH_MSG_THREADS, payload: msgInfo })
       })
-    } catch(err) {
-      console.log('error', err)
+    }).catch((err) => {
       dispatch({ type: FETCH_MSG_THREADS_FAILED })
-    }
+    })
   }
 }
 
 export const fetchMessages = (mentor, self) => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth().currentUser
-      firebase.firestore().collection('users').doc(user.uid)
-      .collection('mentors').doc(mentor.id)
-      .collection('messages').orderBy('timestamp').onSnapshot((querySnap) => {
-        if (querySnap.empty) {
-          createNewThread(mentor, self, dispatch)
-          return dispatch({ type: FETCH_MSGS, payload: [] })
-        }
+    const user = firebase.auth().currentUser
+    firebase.firestore().collection('users').doc(user.uid)
+    .collection('mentors').doc(mentor.id)
+    .collection('messages').orderBy('timeSent').onSnapshot((querySnap) => {
+      if (querySnap.empty) {
+        createNewThread(mentor, self, dispatch)
+        return dispatch({ type: FETCH_MSGS, payload: [] })
+      }
 
-        let msgs = []
-        querySnap.forEach(doc => {
-          msgs.push(doc.data())
-        })
+      let msgs = []
+      querySnap.forEach(doc => {
 
-        msgs = sortedMsgs(msgs)
-        dispatch({ type: FETCH_MSGS, payload: msgs })
-      }, (err) => dispatch({ type: FETCH_MSGS_FAILED, payload: err }))
-    } catch(err) {
-      dispatch({ type: FETCH_MSGS_FAILED, payload: err })
-    }
+        msgs.push(doc.data())
+      })
+      console.log('unsorted', msgs)
+      msgs = sortMessages(msgs)
+      dispatch({ type: FETCH_MSGS, payload: msgs })
+    }, (err) => dispatch({ type: FETCH_MSGS_FAILED, payload: err }))
   }
 }
 
 
 export const fetchUserMessages = (threadId) => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth().currentUser
-      firebase.firestore().collection('coaches').doc(user.uid)
-      .collection('users').doc(threadId)
-      .collection('messages').orderBy('timestamp').onSnapshot((querySnap) => {
-        if (querySnap.empty) {
-          return dispatch({ type: FETCH_MSGS, payload: [] })
-        }
+    const user = firebase.auth().currentUser
+    firebase.firestore().collection('coaches').doc(user.uid)
+    .collection('users').doc(threadId)
+    .collection('messages').orderBy('timeSent').onSnapshot((querySnap) => {
+      if (querySnap.empty) {
+        return dispatch({ type: FETCH_MSGS, payload: [] })
+      }
 
-        let msgs = []
-        querySnap.forEach(doc => {
-          msgs.push(doc.data())
-        })
+      let msgs = []
+      querySnap.forEach(doc => {
+        msgs.push(doc.data())
+      })
 
-        msgs = sortedMsgs(msgs)
-        dispatch({ type: FETCH_MSGS, payload: msgs })
-      }, (err) => dispatch({ type: FETCH_MSGS_FAILED, payload: err }))
-    } catch(err) {
-      dispatch({ type: FETCH_MSGS_FAILED, payload: err })
-    }
+      msgs = sortMessages(msgs)
+      dispatch({ type: FETCH_MSGS, payload: msgs })
+    }, (err) => dispatch({ type: FETCH_MSGS_FAILED, payload: err }))
   }
 }
 
 export const unsubscribeMessages = (thread) => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth().currentUser
-      firebase.firestore().collection('users').doc(user.uid)
-      .collection('message_threads').doc(thread)
-      .collection('messages').onSnapshot(() => {})
-    } catch(err) {
-      console.log('err unscubscribing', err)
-    }
+    const user = firebase.auth().currentUser
+    firebase.firestore().collection('users').doc(user.uid)
+    .collection('message_threads').doc(thread)
+    .collection('messages').onSnapshot(() => {})
   }
 }
 
 export const unsubscribeUserMessages = (thread) => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth().currentUser
-      firebase.firestore().collection('coaches').doc(user.uid)
-      .collection('users').doc(thread)
-      .collection('messages').onSnapshot(() => {})
-    } catch(err) {
-      console.log('err unscubscribing', err)
-    }
+    const user = firebase.auth().currentUser
+    firebase.firestore().collection('coaches').doc(user.uid)
+    .collection('users').doc(thread)
+    .collection('messages').onSnapshot(() => {})
   }
 }
 
 
 const createNewThread = (mentor, self, dispatch) => {
-  try {
-    console.log('create new thread')
-    const threadId = mentor.id
-    const user = firebase.auth().currentUser
-    firebase.firestore().collection('users')
-    .doc(user.uid).collection('mentors')
-    .doc(threadId).set({
-      mentor,
-      user: self,
-      thread: threadId,
-    }).catch((err) => {
-      console.log(err)
-    })
+  const threadId = mentor.id
+  const user = firebase.auth().currentUser
 
-    firebase.firestore().collection('coaches')
-    .doc(mentor.id).collection('users')
-    .doc(user.uid).set({
-      mentor,
-      user: self,
-      thread: user.uid,
-    }).catch((err) => {
-      console.log(err)
-    })
-  } catch(err) {
-    console.log(err, 'err')
-  }
+  //for user the thread id is the mentor's user uid
+  const userThread = firebase.firestore().collection('users')
+  .doc(user.uid).collection('mentors')
+  .doc(threadId).set({
+    mentor,
+    user: self,
+    thread: threadId,
+  })
+
+  //for the mentor the thread id is the mentee's user uid
+  const mentorThread = firebase.firestore().collection('coaches')
+  .doc(mentor.id).collection('users')
+  .doc(user.uid).set({
+    mentor,
+    user: self,
+    thread: user.uid,
+  })
+
+  Promise.all([userThread, mentorThread]).catch((err) => {
+    dispatch({ type: THREAD_CREATION_FAILED, payload: err })
+  })
 }
 
 export const sendMessageToCoach = (thread, text, user, mentor) => {
-  const { name, userId } = user
-  let _message = Message(text, user, mentor)
-  console.log(mentor)
+  const { userId } = user
+  let _message = MessageMentor(text, user, mentor)
+
   return (dispatch) => {
     if (text === "") {
       return;
     }
 
-    try {
-      const _user = firebase.auth().currentUser
-      firebase.firestore().collection('users').doc(userId)
-      .collection('mentors').doc(thread)
-      .collection('messages').add(_message).then(() => {
-        dispatch({ type: SEND_MSG })
-      }).catch((err) => {
-        console.log('SEND_MSG_FAILED', err)
-        dispatch({ type: SEND_MSG_FAILED })
-      })
+    //for personal account
+    let userMsg = firebase.firestore().collection('users').doc(userId)
+    .collection('mentors').doc(thread)
+    .collection('messages').add(_message)
+    //for reciever thread
+    let mentorMsg = firebase.firestore().collection('coaches').doc(mentor.id)
+    .collection('users').doc(userId)
+    .collection('messages').add(_message)
 
-      //for reciever thread
-      firebase.firestore().collection('coaches').doc(mentor.id)
-      .collection('users').doc(userId)
-      .collection('messages').add(_message).then(() => {
-        dispatch({ type: SEND_MSG })
-      }).catch((err) => {
-        console.log('SEND_MSG_FAILED', err)
-        dispatch({ type: SEND_MSG_FAILED })
-      })
-    } catch(err) {
-      console.log('SEND_MSG_FAILED', err)
-      dispatch({ type: SEND_MSG_FAILED })
-    }
+    Promise.all([userMsg, mentorMsg]).then(() => {
+      dispatch({ type: SEND_MSG, payload: _message })
+    }).catch((err) => {
+      dispatch({ type: SEND_MSG_FAILED, payload: err })
+    })
+  }
+}
+
+export const sendMessageToUser = (text, mentee, mentor) => {
+  return (dispatch) => {
+    let _message = MessageUser(text, mentee, mentor)
+    let db = firebase.firestore()
+    let mentorId = mentor.id
+    let menteeId = mentee.userId 
+
+    //for personal account
+    let mentorMsg = db.collection('coaches').doc(mentorId)
+    .collection('users').doc(menteeId).collection('messages').add(_message)
+
+    // for recipient (mentee)
+    let menteeMsg = db.collection('users').doc(menteeId)
+    .collection('mentors').doc(mentorId).collection('messages').add(_message)
+
+    Promise.all([mentorMsg, menteeMsg]).then(() => {
+      dispatch({ type: SEND_MSG, payload: _message })
+    }).catch((err) => {
+      dispatch({ type: SEND_MSG_FAILED, payload: err })
+    })
   }
 }
 
@@ -198,131 +194,108 @@ export const alertUserEmail = () => {
 
 export const fetchMentors = () => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth()
-      firebase.firestore().collection('users').doc(user.uid)
-      .collection('mentors').get().then((querySnap) => {
-        if (querySnap.empty) {
-          mentorInfo = { mentors: [], mentorsEmpty: true }
-          return dispatch({ type: FETCH_MENTOR_THREAD, payload: mentorInfo })
-        }
+    const user = firebase.auth()
+    firebase.firestore().collection('users').doc(user.uid)
+    .collection('mentors').get().then((querySnap) => {
+      if (querySnap.empty) {
+        mentorInfo = { mentors: [], mentorsEmpty: true }
+        return dispatch({ type: FETCH_MENTOR_THREAD, payload: mentorInfo })
+      }
 
-        let mentors = []
-        querySnap.forEach((doc) => {
-          mentors.push(doc.data())
-          mentorInfo = { mentors: mentors, mentorsEmpty: false }
-          dispatch({ tpye: FETCH_MENTOR_THREAD, payload: mentors })
-        })
+      let mentors = []
+      querySnap.forEach((doc) => {
+        mentors.push(doc.data())
+        mentorInfo = { mentors: mentors, mentorsEmpty: false }
+        dispatch({ tpye: FETCH_MENTOR_THREAD, payload: mentors })
       })
-    } catch(err) {
-      dispatch({ type: FETCH_MENTOR_THREAD_FAILED })
-    }
+    }).catch((err) => dispatch({ type: FETCH_MENTOR_THREAD_FAILED, payload: err }))
   }
 }
 
 export const onMessageMentor = (coach, coachId) => {
   return (dispatch) => {
-    try {
-      const user = firebase.auth().currentUser
-      let userRef = firebase.firestore().collection('users').doc(user.uid)
+    const user = firebase.auth().currentUser
+    let userRef = firebase.firestore().collection('users').doc(user.uid)
 
-      userRef.collection('mentors')
-      .where("coachId", "==", coachId)
-      .get().then((querySnap) => {
-        if (querySnap.empty) {
-          return addMenor(coachId)
-        }
+    userRef.collection('mentors')
+    .where("coachId", "==", coachId)
+    .get().then((querySnap) => {
+      if (querySnap.empty) {
+        return addMenor(coachId)
+      }
 
-        let mentors = []
-        querySnap.forEach(doc => {
-          let id = doc.data()
-          userRef.collection('mentors').doc(id)
-          .get().then((doc) => {
-            var mentor = doc.data()
-            dispatch({  })
-          })
-
+      let mentors = []
+      querySnap.forEach(doc => {
+        let id = doc.data()
+        userRef.collection('mentors').doc(id)
+        .get().then((doc) => {
+          var mentor = doc.data()
+          dispatch({ type: FETCH_MENTOR_THREAD, payload: mentors })
         })
       })
-    } catch(err) {
-
-    }
+    })
   }
 }
 
 export const fetchUserThreads = () => {
   return (dispatch) => {
     dispatch({ type: FETCH_USER_THREADS })
-    try {
-      const user = firebase.auth().currentUser
-      firebase.firestore().collection('coaches').doc(user.uid)
-      .collection('users').get().then((querySnap) => {
-        if (querySnap.empty) {
-          dispatch({ type: FETCH_USER_THREADS_SUCCESS, payload: [] })
-        }
+    const user = firebase.auth().currentUser
+    firebase.firestore().collection('coaches').doc(user.uid)
+    .collection('users').get().then((querySnap) => {
+      if (querySnap.empty) {
+        dispatch({ type: FETCH_USER_THREADS_SUCCESS, payload: [] })
+      }
 
-        let users = []
-        querySnap.forEach((doc) => {
-          let thread = doc.data()
-          thread.id = doc.id
-          users.push(thread)
+      let users = []
+      querySnap.forEach((doc) => {
+        let thread = doc.data()
+        thread.id = doc.id
+        users.push(thread)
 
-          dispatch({ type: FETCH_USER_THREADS_SUCCESS, payload: users })
-        })
+        dispatch({ type: FETCH_USER_THREADS_SUCCESS, payload: users })
       })
-    } catch(err) {
+    }).catch((err) => {
       dispatch({ type: FETCH_USER_THREADS_FAIL, payload: err })
-    }
+    })
   }
 }
 
-const Message = (text, user, mentor) => {
-  let id = Math.floor(Math.random() * 10000000000)
-  console.log('text', text)
+const MessageMentor = (text, mentee, mentor) => {
+  let id = uuidv1()
   msg = {
     id: id,
     text: text.text,
-    timestamp: new Date(),
-    user: user.userId,
-    name: user.name,
+    timeSent: moment().format(),
+    from: mentee.userId,
+    nameOfSender: mentee.name,
     to: mentor.name
   }
 
   return msg
 }
 
-const Message1 = (text, user, mentor) => {
-  let id = Math.floor(Math.random() * 10000000000)
+const MessageUser = (text, mentee, mentor) => {
+  let id = uuidv1()
   msg = {
     id: id,
     text: text.text,
-    timestamp: new Date(),
-    user: mentor.id,
-    name: mentor.name,
-    to: user.name
+    timeSent: moment().format(),
+    from: mentor.id,
+    nameOfSender: mentor.name,
+    to: mentee.userId
   }
 
   return msg
 }
 
-const encoder = (info) => {
-  var formBody = [];
-  for (var property in info) {
-    var encodedKey = encodeURIComponent(property);
-    var encodedValue = encodeURIComponent(info[property]);
-    formBody.push(encodedKey + "=" + encodedValue);
-  }
-  formBody = formBody.join("&");
-
-  return formBody;
-}
-
-const sortedMsgs = (messages) => {
+const sortMessages = (messages) => {
   let sortedMsgs = []
   let days = []
   _.forEach(messages, (msg) => {
+    let tstmp = msg.timeSent
     let today = moment().format('MMM Do')
-    let time = moment(msg.timestamp).format('MMM Do')
+    let time = moment(tstmp).format('MMM Do')
 
     if (today === time) {
       msg.isToday = true

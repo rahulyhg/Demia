@@ -3,15 +3,15 @@ import {
   View,
   Text,
 } from 'react-native';
-import { ScaledSheet, scale, verticalScale } from 'react-native-size-matters';
+import { ScaledSheet } from 'react-native-size-matters';
 import { SignupSection } from '../common';
-import { CachedImage } from 'react-native-cached-image';
+import FastImage from 'react-native-fast-image';
 
 const EmptyCard = ({text}) => {
   return (
     <View style={styles.emptyContainer}>
       <SignupSection style={{flexDirection: 'column'}}>
-          <CachedImage
+          <FastImage
             source={require('../../../assets/icons/owl.png')}
             style={styles.imageStyle}
           />

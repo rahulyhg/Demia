@@ -9,9 +9,8 @@ import {
 import {
  ScaledSheet, verticalScale
 } from 'react-native-size-matters';
-import {ChatInput} from './ChatInput'
+import { ChatInput } from './ChatInput'
 import FastImage from 'react-native-fast-image';
-var _ = require('lodash')
 import moment from 'moment'
 import {
   KeyboardAwareScrollView,
@@ -21,8 +20,8 @@ import firebase from 'react-native-firebase';
 class MessageCard extends Component {
   renderProfilePic() {
     const userUid = firebase.auth().currentUser.uid
-    const { user } = this.props.message
-    let profileIcon = userUid == user? require('../../../assets/icons/orangeFox.png') : require('../../../assets/icons/orangeOwl.png')
+    const { from } = this.props.message
+    let profileIcon = userUid !== from? require('../../../assets/icons/orangeFox.png') : require('../../../assets/icons/orangeOwl.png')
 
     if (profileIcon) {
       return (
@@ -47,10 +46,10 @@ class MessageCard extends Component {
   }
 
   renderTimestamp(item) {
-    const { timestamp, isNew, isToday } = item
+    const { timeSent, isNew, isToday } = item
     let today = moment().format('dddd')
-    let msgDate = moment(timestamp).format('dddd')
-    let formatteDate = moment(timestamp).format('MMMM Do')
+    let msgDate = moment(timeSent).format('dddd')
+    let formatteDate = moment(timeSent).format('MMMM Do')
     if (isNew && isToday) {
       return (
         <View style={styles.date}>
@@ -71,11 +70,11 @@ class MessageCard extends Component {
   }
 
   render() {
-    const { text, name, timestamp, user } = this.props.message
+    const { text, nameOfSender, timeSent, from } = this.props.message
     const { messageCardContainer, messageInfoContainer, nameStyle, timestampStyle, messageStyle } = styles
     const userUid = firebase.auth().currentUser.uid
 
-    let color = userUid === user? '#FFFBEF':'#FFEBE0'
+    let color = userUid === from? '#FFFBEF':'#FFEBE0'
     return (
       <TouchableOpacity>
         <View>
@@ -87,8 +86,8 @@ class MessageCard extends Component {
             <View style={styles.messageContainer}>
               <View>
                 <View style={messageInfoContainer}>
-                  <Text style={nameStyle}>{name}</Text>
-                  <Text style={timestampStyle}>{moment(timestamp).format('h:mm a')}</Text>
+                  <Text style={nameStyle}>{nameOfSender}</Text>
+                  <Text style={timestampStyle}>{moment(timeSent).format('h:mm a')}</Text>
                 </View>
 
                 <Text style={messageStyle}>{text}</Text>
